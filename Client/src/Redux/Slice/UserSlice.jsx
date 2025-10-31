@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { autoLogin, login, register } from "../Thunk/UserThunk";
+import { autoLogin, login, logout, register } from "../Thunk/UserThunk";
 
 const UserSlice = createSlice({
     name: 'user',
@@ -17,11 +17,11 @@ const UserSlice = createSlice({
             })
             .addCase(register.fulfilled, (state, action) => {
                 state.loading = false
-                state.success = true
+
             })
             .addCase(register.rejected, (state, action) => {
                 state.loading = false;
-                state.success = false;
+
                 state.error = action.payload
             })
 
@@ -31,11 +31,10 @@ const UserSlice = createSlice({
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.loading = false;
-                state.success = true
+
             })
             .addCase(login.rejected, (state, action) => {
                 state.loading = false;
-                state.success = false;
                 state.error = action.payload
             })
 
@@ -45,12 +44,24 @@ const UserSlice = createSlice({
             })
             .addCase(autoLogin.fulfilled, (state, action) => {
                 state.loading = false
-                state.success = true
                 state.user = action.payload
             })
             .addCase(autoLogin.rejected, (state, action) => {
                 state.loading = false;
-                state.success = false;
+
+            })
+
+            //logout
+            .addCase(logout.pending, (state) => {
+                state.loading = true
+            })
+            .addCase(logout.fulfilled, (state, action) => {
+                state.loading = false
+
+            })
+            .addCase(logout.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload
             })
     }
 })

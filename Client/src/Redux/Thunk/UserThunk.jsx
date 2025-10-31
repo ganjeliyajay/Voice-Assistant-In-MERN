@@ -32,3 +32,13 @@ export const autoLogin = createAsyncThunk('autologin', async (_, { rejectWithVal
         // return rejectWithValue(error.response.data.message)
     }
 })
+
+export const logout = createAsyncThunk('logout', async (_, { rejectWithValue }) => {
+    try {
+        const res = await axios.post(`${auth}/logout`, {}, { withCredentials: true })
+        return res.data
+    } catch (error) {
+        console.log(error.response.data.message)
+        return rejectWithValue(error.response.data.message)
+    }
+})

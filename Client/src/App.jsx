@@ -5,6 +5,7 @@ import Register from './Pages/Register'
 import Login from './Pages/Login'
 import { IoHome } from 'react-icons/io5'
 import Home from './Pages/Home'
+import Logout from './Pages/Logout'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path='/register' element={<Register />} />
         <Route path='/' element={<Login />} />
         <Route path='/home' element={<Home />} />
+        <Route path='/logout' element={<Logout />} />
       </Routes>
     </BrowserRouter>
   )
