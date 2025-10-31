@@ -4,9 +4,10 @@ import background from '../assets/bg.jpg'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../Redux/Thunk/UserThunk';
+import { Bounce, toast } from 'react-toastify';
 
 export default function Register() {
-  const { error, loading } = useSelector(s => s.user)
+  const { error, loading } = useSelector(s => s.users)
 
   const [showPassword, setShowPassword] = useState(false)
   const [data, setData] = useState({
@@ -26,10 +27,29 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault()
     try {
-      dispatch(register(data))
-      navigate('/')
+      dispatch(register(data)).unwrap()
+      navigate('/home')
+
+      //toastify a message
+      toast.success('Login successfully', {
+        position: "top-right",
+        autoClose: 1000,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "dark",
+        transition: Bounce,
+      });
     } catch (error) {
       console.log(error)
+
+      toast.warn(error, {
+        position: "top-right",
+        autoClose: 1000,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "dark",
+        transition: Bounce,
+      });
     }
   }
   return (
@@ -54,11 +74,10 @@ export default function Register() {
           {showPassword && <IoEyeOff className='absolute top-[18px] right-[20px] w-[25px] h-[25px] text-[white] cursor-pointer' onClick={() => setShowPassword(false)} />}
 
         </div>
-        <p className='text-red-500 text-[17px]'>{error ? error : ''}</p>
 
         <button className='min-w-[150px] h-[60px] mt-[30px] text-black font-semibold  bg-white rounded-full text-[19px] hover:bg-blue-400 duration-300 cursor-pointer'>{loading ? "Loading..." : "Sign Up"}</button>
 
-        <p className='text-[white] text-[18px] cursor-pointer' onClick={() => navigate("/login")}>Already have an account ? <span className='text-blue-400'>Sign In</span></p>
+        <p className='text-[white] text-[18px] cursor-pointer' onClick={() => navigate("/")}>Already have an account ? <span className='text-blue-400'>Sign In</span></p>
       </form>
 
     </div>

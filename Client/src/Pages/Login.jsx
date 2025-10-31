@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import background from '../assets/bg.jpg'
 import { IoEye, IoEyeOff } from 'react-icons/io5'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../Redux/Thunk/UserThunk'
+import { autoLogin, login } from '../Redux/Thunk/UserThunk'
+import { Bounce, toast } from 'react-toastify'
 
 
 export default function Login() {
@@ -11,7 +12,7 @@ export default function Login() {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const { error, loading } = useSelector(s => s.user)
+    const { error, loading, user, success } = useSelector(s => s.users)
 
     const [showPassword, setShowPassword] = useState(false)
     const [data, setData] = useState({
@@ -19,22 +20,49 @@ export default function Login() {
         password: ''
     })
 
+
+    const userId = user?.userId
+
     const onChange = (e) => {
         const { name, value } = e.target
         setData({ ...data, [name]: value })
     }
 
-    console.log(data)
+    useEffect(() => {
+        dispatch(autoLogin())
+    }, [dispatch])
+
+    useEffect(() => {
+        if (userId) navigate('/home');
+    }, [userId, navigate]);
 
     const handleLogin = async (e) => {
-          e.preventDefault()
+        e.preventDefault()
         try {
-            
-           await dispatch(login(data))
-            navigate('/')
+
+            await dispatch(login(data)).unwrap()
+            navigate('/home')
+
+            //toastify a message
+            toast.success('Login successfully', {
+                position: "top-right",
+                autoClose: 1000,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                transition: Bounce,
+            });
 
         } catch (error) {
             console.log(error)
+            toast.warn(error, {
+                position: "top-right",
+                autoClose: 1000,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                transition: Bounce,
+            });
         }
     }
 
@@ -59,11 +87,13 @@ export default function Login() {
                     {showPassword && <IoEyeOff className='absolute top-[18px] right-[20px] w-[25px] h-[25px] text-[white] cursor-pointer' onClick={() => setShowPassword(false)} />}
 
                 </div>
-                <p className='text-red-500 text-[17px]'>{error ? error : ''}</p>
 
                 <button className='min-w-[150px] h-[60px] mt-[30px] text-black font-semibold  bg-white rounded-full text-[19px] hover:bg-blue-400 duration-300 cursor-pointer'>{loading ? "Loading..." : "Sign In"}</button>
 
-                <p className='text-[white] text-[18px] cursor-pointer' onClick={() => navigate("/register")}>Already have an account ? <span className='text-blue-400'>Sign Up</span></p>
+                <p className='text-[white] text-[18px] cursor-pointer' onClick={() => navigate("/register")}>
+                    Don’t have an account? <span className='text-blue-400'>Sign Up</span>
+                </p>
+
             </form>
 
         </div>
