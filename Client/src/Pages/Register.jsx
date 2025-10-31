@@ -27,6 +27,7 @@ export default function Register() {
     e.preventDefault()
     try {
       dispatch(register(data))
+      navigate('/')
     } catch (error) {
       console.log(error)
     }
@@ -57,7 +58,7 @@ export default function Register() {
 
         <button className='min-w-[150px] h-[60px] mt-[30px] text-black font-semibold  bg-white rounded-full text-[19px] hover:bg-blue-400 duration-300 cursor-pointer'>{loading ? "Loading..." : "Sign Up"}</button>
 
-        <p className='text-[white] text-[18px] cursor-pointer' onClick={() => navigate("/signin")}>Already have an account ? <span className='text-blue-400'>Sign In</span></p>
+        <p className='text-[white] text-[18px] cursor-pointer' onClick={() => navigate("/login")}>Already have an account ? <span className='text-blue-400'>Sign In</span></p>
       </form>
 
     </div>
