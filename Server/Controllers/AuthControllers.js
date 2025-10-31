@@ -94,7 +94,7 @@ export const autoLogin = async (req, res) => {
             return res.status(401).json({ message: `Invalid token` })
         }
 
-        res.status(200).json({ user: verifyToken })
+        res.status(200).json( verifyToken )
 
     } catch (error) {
         console.log(error)
