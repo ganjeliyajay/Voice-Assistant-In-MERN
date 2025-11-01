@@ -8,7 +8,7 @@ export const geminiResponse = async (command) => {
         const apiUrl = process.env.GEMINI_URL
 
         const assistantName = 'gemini'
-        const userName = 'Jay'
+        const userName = 'Ganjeliya Jay'
 
         const prompt = `You are a virtual assistant named ${assistantName} created by ${userName}. 
 You are not Google. You will now behave like a voice-enabled assistant.

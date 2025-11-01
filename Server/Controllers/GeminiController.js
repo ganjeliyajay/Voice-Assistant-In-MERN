@@ -1,51 +1,63 @@
-import { geminiResponse } from "../Gemini.js"
-import moment from "moment"
+import moment from "moment";
+import { geminiResponse } from "../Gemini.js";
 
 export const askToAssistant = async (req, res) => {
     try {
+        const { command } = req.body;
 
-        const { command } = req.body
-
-        const result = await geminiResponse(command)
-
-        const jsonMatch = result.match(/{[/s/S]*}/)
-        if (!jsonMatch) {
-            return res.stauts(400).json({ response: `sorry, i can't unserderstand` })
+        if (!command) {
+            return res.status(400).json({ response: "Command is required." });
         }
 
-        const gemResult = JSON.parse(jsonMatch[0])
+        const result = await geminiResponse(command);
 
-        const type = gemResult.type
+        if (!result) {
+            return res.status(400).json({ response: "Empty response from Gemini." });
+        }
+
+        // ✅ Fix regex to correctly extract JSON from text (supports newlines)
+        const jsonMatch = result.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            return res.status(400).json({ response: "Sorry, I couldn't understand that." });
+        }
+
+        const gemResult = JSON.parse(jsonMatch[0]);
+        const type = gemResult.type;
 
         switch (type) {
-            case 'get-date':
+            case "get-date":
                 return res.json({
                     type,
                     userInput: gemResult.userInput,
-                    response: `current date is ${moment().format("YYYY-MM-DD")}`
+                    response: `Current date is ${moment().format("YYYY-MM-DD")}`,
                 });
-            case 'get-time':
+
+            case "get-time":
                 return res.json({
                     type,
                     userInput: gemResult.userInput,
-                    response: `current time is ${moment().format("hh:mm A")}`
+                    response: `Current time is ${moment().format("hh:mm A")}`,
                 });
-            case 'get-day':
+
+            case "get-day":
                 return res.json({
                     type,
                     userInput: gemResult.userInput,
-                    response: `today is ${moment().format("dddd")}`
+                    response: `Today is ${moment().format("dddd")}`,
                 });
-            case 'get-month':
+
+            case "get-month":
                 return res.json({
                     type,
                     userInput: gemResult.userInput,
-                    response: `today is ${moment().format("MMMM")}`
+                    response: `This month is ${moment().format("MMMM")}`,
                 });
-            case 'google-search':
-            case 'youtube-search':
-            case 'youtube-play':
-            case 'general':
+
+            // ✅ handle all other Gemini response types
+            case "google-search":
+            case "youtube-search":
+            case "youtube-play":
+            case "general":
             case "calculator-open":
             case "instagram-open":
             case "facebook-open":
@@ -57,10 +69,15 @@ export const askToAssistant = async (req, res) => {
                 });
 
             default:
-                return res.status(400).json({ response: "I didn't understand that command." })
+                return res.status(400).json({
+                    response: "I didn't understand that command.",
+                });
         }
-
     } catch (error) {
-        return res.status(500).json({ response: "as assistant error" })
+        console.error("❌ Assistant Error:", error);
+        return res.status(500).json({
+            response: "Assistant error while processing your command.",
+            error: error.message,
+        });
     }
-}
+};

@@ -6,12 +6,13 @@ export default function Home() {
     return (
         <div className='w-full h-[100vh] bg-linear-to-t to-blue-950 from-[#000000]'>
             {/* side bar */}
-            <div>
-                <Logout />
+            <div className='absolute'>
+                
             </div>
 
-            <div>
+            <div >
                 <Hero />
+                <Logout />
             </div>
         </div>
     )

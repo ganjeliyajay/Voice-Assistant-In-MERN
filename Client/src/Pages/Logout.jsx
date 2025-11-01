@@ -54,8 +54,8 @@ export default function Logout() {
                     <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                         <div className="w-14 h-14 border-4 border-white/30 border-t-blue-500 rounded-full animate-spin"></div>
                     </div>) : (
-                    <button onClick={handleLogout} className="text-[17px] font-semibold flex items-center gap-2">
-                        Logout
+                    <button onClick={handleLogout} className=" text-[17px] font-semibold flex items-center gap-2">
+                       <p className="hidden md:block">Logout</p>
                         <TbLogout className="text-2xl text-red-400 group-hover:text-red-500 transition-colors duration-300" />
                     </button>
                 )
