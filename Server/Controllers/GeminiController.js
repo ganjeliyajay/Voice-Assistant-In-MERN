@@ -1,4 +1,4 @@
-import { geminiResponse } from "../../Gemini.js"
+import { geminiResponse } from "../Gemini.js"
 import moment from "moment"
 
 export const askToAssistant = async (req, res) => {
