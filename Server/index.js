@@ -1,28 +1,36 @@
-import express, { json, urlencoded } from 'express'
-import dotenv from 'dotenv'
-import cors from 'cors'
-import cookieParser from 'cookie-parser'
-import { DatabaseConncet } from './Configs/db.js'
-import { routes } from './Routes/AuthRoutes.js'
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import { DatabaseConncet } from './Configs/db.js';
+import { routes } from './Routes/AuthRoutes.js';
 
-dotenv.config()
+dotenv.config();
 
-const app = express()
+const app = express();
 
+// Middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-app.use(json(), urlencoded({ extended: true }))
-app.use(cookieParser())
 
 app.use(cors({
-    origin: ['http://localhost:5173'], // your Vite frontend
+    origin: [process.env.CLIENT_URL],
     credentials: true,
-}))
+}));
 
-//Databaseconnected
-DatabaseConncet()
+// Database connected
+DatabaseConncet();
 
-//Routes
-app.use('/assistant', routes)
+// Routes
+app.use('/assistant', routes);
 
-const PORT = process.env.PORT
-app.listen(PORT, () => console.log(`Server is running on : ${PORT}`))
+// Health check (optional)
+app.get('/', (req, res) => {
+    res.send('✅ Voice Assistant Backend is running on Render!');
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server is running on port: ${PORT}`));
