@@ -17,9 +17,9 @@ app.use(cookieParser());
 
 const isProduction = process.env.NODE_ENV === "production";
 app.use(cors({
-    origin: [
-        'https://virtual-voice-assistant.netlify.app'
-    ],             // ✅ local dev
+    origin: isProduction
+        ? [process.env.CLIENT_URL]                // ✅ only frontend URL on Render
+        : ["http://localhost:5173"],             // ✅ local dev
     credentials: true,
 }));
 

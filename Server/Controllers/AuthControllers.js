@@ -27,11 +27,13 @@ export const register = async (req, res) => {
         //token ne call karayo and pchi generate token generate karayo
         const token = await genToken(user._id)
 
+        const isProduction = process.env.NODE_ENV === "production";
+
         res.cookie('loginToken', token, {
             httpOnly: true,
-            maxAge: 10 * 24 * 60 * 60 * 1000,
-            sameSite: "strict",
-            secure: false
+            secure: isProduction,         // true only in production
+            sameSite: isProduction ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         await user.save()
 
