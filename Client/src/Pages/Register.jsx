@@ -28,7 +28,7 @@ export default function Register() {
     e.preventDefault()
     try {
       dispatch(register(data)).unwrap()
-      navigate('/home')
+      navigate('/assistant')
 
       //toastify a message
       toast.success('Login successfully', {

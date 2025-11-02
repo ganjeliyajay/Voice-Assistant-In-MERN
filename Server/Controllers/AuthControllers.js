@@ -6,7 +6,7 @@ import { genToken } from "../Configs/token.js"
 //register
 export const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body
+        const { name, email, password, assistantname } = req.body
 
         if (!name || !email || !password) {
             return res.status(500).json({ message: `Inputs are required!` })
@@ -23,7 +23,7 @@ export const register = async (req, res) => {
 
         const hashPassword = await bcrypt.hash(password, 10)
 
-        const user = await $user({ name, email, password: hashPassword })
+        const user = await $user({ name, email, password: hashPassword, assistantname: null })
         //token ne call karayo and pchi generate token generate karayo
         const token = await genToken(user._id)
 
@@ -82,6 +82,29 @@ export const login = async (req, res) => {
     }
 }
 
+//find current user
+export const getUser = async (req, res) => {
+    try {
+        const userId = req.userId
+
+        const user = await $user.findById(userId)
+
+        const userName = user.name
+        const assistant = user.assistantname
+
+        res.status(200).json({
+            data: {
+                userName: user.name,
+                assistantName: user.assistantname || "No assistant name set",
+            },
+        })
+
+    } catch (error) {
+        console.log(error)
+        return res.status(401).json({ message: `Login error : ${error}` })
+    }
+}
+
 //auto login
 export const autoLogin = async (req, res) => {
     try {
@@ -94,7 +117,7 @@ export const autoLogin = async (req, res) => {
             return res.status(401).json({ message: `Invalid token` })
         }
 
-        res.status(200).json( verifyToken )
+        res.status(200).json(verifyToken)
 
     } catch (error) {
         console.log(error)
@@ -110,5 +133,31 @@ export const logout = async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(401).json({ message: `logout error : ${error}` })
+    }
+}
+
+//add assistant name
+export const assistantName = async (req, res) => {
+    try {
+        const { assistantname } = req.body
+        const userId = req.userId
+
+        const user = await $user.findById(userId)
+        if (!user) {
+            return res.status(401).json({ message: `user not found` })
+        }
+
+        user.assistantname = assistantname
+
+        await user.save()
+
+        res.status(200).json({
+            message: `Welcome, ${assistantname}!`,
+            assistantname: user.assistantname
+        });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(401).json({ message: `Assistant error : ${error}` })
     }
 }

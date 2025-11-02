@@ -42,7 +42,7 @@ export default function Logout() {
 
     return (
         <div
-            className="fixed bottom-6 left-6 flex gap-2 px-5 py-2.5 
+            className="fixed bottom-[6%] left-6 flex gap-2 px-5 py-2.5 
                  text-white
                  rounded-full shadow-md backdrop-blur-md 
                  cursor-pointer hover:bg-white/20 hover:scale-105 

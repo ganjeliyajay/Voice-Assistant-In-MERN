@@ -5,6 +5,7 @@ import Register from './Pages/Register'
 import Login from './Pages/Login'
 import Home from './Pages/Home'
 import Logout from './Pages/Logout'
+import AddAssistantName from './Pages/AddAssistantName'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path='/' element={<Login />} />
         <Route path='/home' element={<Home />} />
         <Route path='/logout' element={<Logout />} />
+        <Route path='/assistant' element={<AddAssistantName />} />
       </Routes>
     </BrowserRouter>
   )

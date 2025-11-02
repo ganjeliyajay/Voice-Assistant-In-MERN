@@ -42,3 +42,25 @@ export const logout = createAsyncThunk('logout', async (_, { rejectWithValue }) 
         return rejectWithValue(error.response.data.message)
     }
 })
+
+//add assistant name
+export const addAssistantName = createAsyncThunk('assistantName', async (assistantName, { rejectWithValue }) => {
+    try {
+        const res = await axios.post(`${auth}/assistant`, assistantName, { withCredentials: true })
+
+    } catch (error) {
+        console.log(error.response.data.message)
+        return rejectWithValue(error.response.data.message)
+    }
+})
+
+//current user
+export const getUser = createAsyncThunk('getUser', async (_, { rejectWithValue }) => {
+    try {
+        const res = await axios.get(`${auth}/user`, { withCredentials: true })
+        return res.data
+    } catch (error) {
+        console.log(error.response.data.message)
+        return rejectWithValue(error.response.data.message)
+    }
+})
