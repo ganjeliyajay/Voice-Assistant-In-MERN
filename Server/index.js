@@ -15,8 +15,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 
+const isProduction = process.env.NODE_ENV === "production";
 app.use(cors({
-    origin: [process.env.CLIENT_URL],
+    origin: isProduction
+        ? [process.env.CLIENT_URL]                // ✅ only frontend URL on Render
+        : ["http://localhost:5173"],             // ✅ local dev
     credentials: true,
 }));
 

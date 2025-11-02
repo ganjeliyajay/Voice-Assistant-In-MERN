@@ -66,11 +66,13 @@ export const login = async (req, res) => {
 
         const token = await genToken(user._id)
 
+        const isProduction = process.env.NODE_ENV === "production";
+
         res.cookie('loginToken', token, {
             httpOnly: true,
-            maxAge: 10 * 24 * 60 * 60 * 1000,
-            sameSite: "strict",
-            secure: false
+            secure: isProduction,         // true only in production
+            sameSite: isProduction ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         })
 
         res.status(200).json({ message: `Login successfully !` })
