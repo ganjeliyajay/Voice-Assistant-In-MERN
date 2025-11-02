@@ -4,6 +4,7 @@ import Ai from "../assets/Ai-image/image.png";
 import { useDispatch, useSelector } from "react-redux";
 import { getGeminiResponse } from "../Redux/Thunk/GeminiThunk";
 import { getUser } from "../Redux/Thunk/UserThunk";
+import { Mic, MicOff } from "lucide-react"; // 🧩 install lucide-react: npm i lucide-react
 
 export default function Hero() {
   const dispatch = useDispatch();
@@ -15,77 +16,57 @@ export default function Hero() {
   const [listening, setListening] = useState(false);
   const [transcriptText, setTranscriptText] = useState("");
   const [response, setResponse] = useState("");
+
   const isSpeakingRef = useRef(false);
   const recognitionRef = useRef(null);
-  const isRecognizingRef = useRef(false);
   const synth = window.speechSynthesis;
 
-  // 🧠 Fetch user once
   useEffect(() => {
     dispatch(getUser());
   }, [dispatch]);
 
-  // 🗣️ Speak function (auto resume mic after finish)
+  // 🎤 Start recognition manually
+  const startRecognition = () => {
+    if (!recognitionRef.current) return;
+    try {
+      recognitionRef.current.start();
+      console.log("🎧 Mic started");
+    } catch (err) {
+      console.warn("Mic start error:", err);
+    }
+  };
+
+  // 🔇 Stop recognition manually
+  const stopRecognition = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      console.log("🛑 Mic stopped");
+    }
+  };
+
+  // 🗣️ Speak
   const speak = (text) => {
     if (!text) return;
-
+    stopRecognition();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "hi-IN";
-
-    const voices = window.speechSynthesis.getVoices();
+    const voices = synth.getVoices();
     const hindiVoice = voices.find((v) => v.lang === "hi-IN");
     if (hindiVoice) utterance.voice = hindiVoice;
-
-    // Stop listening while speaking
-    if (recognitionRef.current && isRecognizingRef.current) {
-      recognitionRef.current.stop();
-      setListening(false);
-      isRecognizingRef.current = false;
-      console.log("🎤 Mic paused while speaking...");
-    }
-
-    isSpeakingRef.current = true;
-    synth.cancel(); // Stop any ongoing speech
+    synth.cancel();
     synth.speak(utterance);
-
     utterance.onend = () => {
-      console.log("✅ AI finished speaking, restarting mic...");
-      isSpeakingRef.current = false;
-
-      // Resume recognition after 1 second
-      setTimeout(() => {
-        if (!isRecognizingRef.current && recognitionRef.current) {
-          startRecognition();
-        }
-      }, 1000);
+      console.log("✅ Done speaking");
     };
   };
 
-  // 🔊 Start recognition safely
-  const startRecognition = () => {
-    if (!recognitionRef.current) return;
-    if (isRecognizingRef.current || isSpeakingRef.current) return;
-
-    try {
-      recognitionRef.current.start();
-      console.log("🎤 Recognition started");
-    } catch (err) {
-      if (err.name !== "InvalidStateError")
-        console.error("Recognition start failed:", err);
-    }
-  };
-
-  // ⚙️ Handle command logic
+  // 🎯 Handle Command
   const handleCommand = (data) => {
     const { type, userInput, response } = data;
     speak(response);
-
     const actions = {
       "google-search": () =>
-        window.open(
-          `https://www.google.com/search?q=${encodeURIComponent(userInput)}`,
-          "_blank"
-        ),
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(userInput)}`, "_blank"),
       "calculator-open": () =>
         window.open("https://www.google.com/search?q=calculator", "_blank"),
       "instagram-open": () => window.open("https://www.instagram.com/", "_blank"),
@@ -93,30 +74,18 @@ export default function Hero() {
       "weather-show": () =>
         window.open("https://www.google.com/search?q=weather", "_blank"),
       "youtube-search": () =>
-        window.open(
-          `https://www.youtube.com/results?search_query=${encodeURIComponent(
-            userInput
-          )}`,
-          "_blank"
-        ),
+        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(userInput)}`, "_blank"),
       "youtube-play": () =>
-        window.open(
-          `https://www.youtube.com/results?search_query=${encodeURIComponent(
-            userInput
-          )}`,
-          "_blank"
-        ),
+        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(userInput)}`, "_blank"),
     };
-
     if (actions[type]) actions[type]();
   };
 
-  // 🎙️ Speech Recognition setup
+  // 🧠 Setup speech recognition once
   useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Speech Recognition is not supported in this browser.");
+      alert("Speech Recognition not supported in this browser.");
       return;
     }
 
@@ -126,36 +95,23 @@ export default function Hero() {
     recognition.interimResults = false;
     recognitionRef.current = recognition;
 
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then(() => console.log("✅ Microphone access granted"))
-      .catch(() =>
-        alert("⚠️ Please allow microphone access to use the assistant.")
-      );
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(() => console.log("✅ Mic access granted"))
+      .catch(() => alert("⚠️ Please allow microphone access."));
 
     recognition.onstart = () => {
-      console.log("🎙️ Listening...");
-      isRecognizingRef.current = true;
+      console.log("🎧 Listening...");
       setListening(true);
     };
 
     recognition.onend = () => {
-      console.log("🛑 Recognition ended");
-      isRecognizingRef.current = false;
+      console.log("🛑 Stopped listening");
       setListening(false);
-      // only restart if AI not speaking
-      if (!isSpeakingRef.current) {
-        setTimeout(startRecognition, 1000);
-      }
     };
 
     recognition.onerror = (e) => {
       console.warn("⚠️ Recognition error:", e.error);
-      isRecognizingRef.current = false;
       setListening(false);
-      if (e.error !== "aborted" && !isSpeakingRef.current) {
-        setTimeout(startRecognition, 1000);
-      }
     };
 
     recognition.onresult = async (e) => {
@@ -164,9 +120,7 @@ export default function Hero() {
       setTranscriptText(transcript);
 
       if (transcript.toLowerCase().includes(assistantName.toLowerCase())) {
-        recognition.stop();
-        setListening(false);
-
+        stopRecognition();
         try {
           const data = await dispatch(getGeminiResponse(transcript)).unwrap();
           const aiResponse =
@@ -176,38 +130,23 @@ export default function Hero() {
           setResponse(aiResponse);
           handleCommand({ ...data, response: aiResponse, userInput: transcript });
         } catch (error) {
-          console.error("Gemini response error:", error);
-          setResponse("There was an error processing your request.");
+          console.error("Gemini error:", error);
+          setResponse("Error processing your request.");
         }
       }
     };
 
-    // 🎤 Greeting once
+    // 🎤 Initial greeting
     const greeting = new SpeechSynthesisUtterance(
-      `Hello ${username}, I am your ${assistantName}. What can I help you with today?`
+      `Hello ${username}, I am your ${assistantName}. Tap the mic button to start speaking.`
     );
     greeting.lang = "en-IN";
     synth.speak(greeting);
-
-    // Start mic initially after greeting
-    setTimeout(() => startRecognition(), 1500);
-
-    return () => {
-      recognition.stop();
-      setListening(false);
-    };
-  }, [assistantName, dispatch, username]);
+  }, [assistantName, username, dispatch]);
 
   // 🎨 UI
   return (
     <div className="w-full flex flex-col justify-center items-center gap-6 bg-gradient-to-b from-[#0f172a] to-[#1e293b] text-center px-4 relative min-h-screen overflow-hidden">
-      {/* Mic indicator */}
-      <div
-        className={`absolute top-5 right-5 w-4 h-4 rounded-full ${
-          listening ? "bg-green-400 animate-pulse" : "bg-gray-500"
-        }`}
-      ></div>
-
       {/* AI Avatar */}
       <motion.img
         src={Ai}
@@ -215,29 +154,44 @@ export default function Hero() {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1 }}
-        className="w-[180px] h-[180px] object-cover rounded-full shadow-[0_0_30px_#38bdf8] animate-[pulse_2s_infinite]"
+        className="w-[140px] h-[140px] object-cover rounded-full shadow-[0_0_30px_#38bdf8] mt-10"
       />
 
-      <h1 className="text-4xl font-bold text-white tracking-wider mt-4 drop-shadow-[0_0_10px_#38bdf8]">
+      <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-wider mt-4">
         Virtual <span className="text-blue-400">Assistant</span>
       </h1>
 
-      {/* Response */}
       {response && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="bg-gray-800/60 backdrop-blur-md p-4 rounded-xl mt-4 max-w-[600px] text-gray-100 shadow-md"
+          className="bg-gray-800/60 backdrop-blur-md p-4 rounded-xl mt-4 max-w-[90%] sm:max-w-[600px] text-gray-100 shadow-md"
         >
-          <p className="text-lg leading-relaxed">{response}</p>
+          <p className="text-base sm:text-lg leading-relaxed">{response}</p>
         </motion.div>
       )}
 
-      {/* Listening Wave Animation */}
+      {/* MIC BUTTON */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={() => {
+          if (listening) stopRecognition();
+          else startRecognition();
+        }}
+        className={`mt-8 flex items-center justify-center w-16 h-16 rounded-full border-4 transition-all duration-300 ${
+          listening
+            ? "border-red-500 bg-red-500/30 text-red-400 shadow-[0_0_25px_#f87171]"
+            : "border-blue-500 bg-blue-500/20 text-blue-400 shadow-[0_0_25px_#38bdf8]"
+        }`}
+      >
+        {listening ? <MicOff size={32} /> : <Mic size={32} />}
+      </motion.button>
+
+      {/* Wave animation when listening */}
       {listening && (
         <motion.div
-          className="flex gap-1 mt-6"
+          className="flex gap-1 mt-4"
           initial="hidden"
           animate="visible"
           variants={{
@@ -247,7 +201,7 @@ export default function Hero() {
           {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
-              className="w-2 bg-blue-400 rounded-full"
+              className="w-1.5 sm:w-2 bg-blue-400 rounded-full"
               variants={{
                 hidden: { scaleY: 0.3 },
                 visible: {
@@ -260,16 +214,17 @@ export default function Hero() {
                   },
                 },
               }}
-              style={{ height: "25px" }}
+              style={{ height: "20px" }}
             ></motion.div>
           ))}
         </motion.div>
       )}
 
-      {/* Transcript Hint */}
-      <p className="text-white text-base max-w-[700px] opacity-80 mt-4">
+      <p className="text-white text-sm sm:text-base max-w-[700px] opacity-80 mt-4">
         <span className="text-blue-300">
-          "{transcriptText || `Say '${assistantName}' to activate me`}"
+          {transcriptText
+            ? `"${transcriptText}"`
+            : `Tap the mic & say "${assistantName}"`}
         </span>
       </p>
     </div>

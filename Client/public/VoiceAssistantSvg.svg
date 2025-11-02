@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <!-- Neon Gradient -->
+    <linearGradient id="glowGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#00f6ff"/>
+      <stop offset="1" stop-color="#b066ff"/>
+    </linearGradient>
+
+    <!-- Softer Glow Filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Background Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#050510"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Circular Background -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGlow)" />
+
+  <!-- Centered Mic Icon -->
+  <g filter="url(#glow)" transform="translate(128,90)">
+    <!-- Outer mic ring -->
+    <circle cx="128" cy="120" r="85" stroke="url(#glowGradient)" stroke-width="10" fill="none"/>
+    <!-- Mic body -->
+    <rect x="114" y="70" width="28" height="90" rx="14" fill="url(#glowGradient)"/>
+    <!-- Mic base curve -->
+    <path d="M90 230c30 30 110 30 140 0" stroke="url(#glowGradient)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Title -->
+  <text x="256" y="400" text-anchor="middle"
+        fill="url(#glowGradient)"
+        font-size="38"
+        font-family="Poppins, sans-serif"
+        font-weight="700"
+        letter-spacing="1.5">
+    Virtual Assistant
+  </text>
+</svg>
