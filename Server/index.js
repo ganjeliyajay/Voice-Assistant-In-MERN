@@ -18,7 +18,7 @@ app.use(cookieParser());
 const isProduction = process.env.NODE_ENV === "production";
 app.use(cors({
     origin: [
-        'https://virtual-voicegi-assistant.netlify.app/'
+        'https://virtual-voice-assistant.netlify.app'
     ],             // ✅ local dev
     credentials: true,
 }));
