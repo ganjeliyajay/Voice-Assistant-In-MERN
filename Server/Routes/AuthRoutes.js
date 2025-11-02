@@ -13,4 +13,4 @@ routes.route('/user').get(isAuth, getUser)
 
 
 //gemini routes
-routes.route('/command').post(askToAssistant)
+routes.route('/command').post(isAuth, askToAssistant)

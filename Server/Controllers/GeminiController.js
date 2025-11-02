@@ -1,5 +1,6 @@
 import moment from "moment";
 import { geminiResponse } from "../Gemini.js";
+import { $user } from "../Modules/UserModule.js";
 
 export const askToAssistant = async (req, res) => {
     try {
@@ -9,7 +10,16 @@ export const askToAssistant = async (req, res) => {
             return res.status(400).json({ response: "Command is required." });
         }
 
-        const result = await geminiResponse(command);
+        const userId = req.userId
+
+        const user = await $user.findById(userId)
+        if (!user) {
+            return res.status(400).json({ response: "user not found" });
+        }
+
+        const assistantName = user.assistantname
+
+        const result = await geminiResponse(command,assistantName);
 
         if (!result) {
             return res.status(400).json({ response: "Empty response from Gemini." });

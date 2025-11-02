@@ -3,14 +3,13 @@ import axios from 'axios'
 dotenv.config()
 
 
-export const geminiResponse = async (command) => {
+export const geminiResponse = async (command, assistantName) => {
     try {
         const apiUrl = process.env.GEMINI_URL
+        
+        const author = 'Ganjeliya Jay'
 
-        const assistantName = 'gemini'
-        const userName = 'Ganjeliya Jay'
-
-        const prompt = `You are a virtual assistant named ${assistantName} created by ${userName}. 
+        const prompt = `You are a virtual assistant named ${assistantName} created by ${author}. 
 You are not Google. You will now behave like a voice-enabled assistant.
 
 Your task is to understand the user's natural language input and respond with a JSON object like this:
@@ -43,7 +42,7 @@ Type meanings:
 - "get-month": if user asks for the current month.
 
 Important:
-- Use ${userName} agar koi puche tume kisne banaya 
+- Use ${author} agar koi puche tume kisne banaya 
 - Only respond with the JSON object, nothing else.
 
 
