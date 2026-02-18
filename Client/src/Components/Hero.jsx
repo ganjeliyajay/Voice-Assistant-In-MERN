@@ -4,7 +4,7 @@ import Ai from "../assets/Ai-image/image.png";
 import { useDispatch, useSelector } from "react-redux";
 import { getGeminiResponse } from "../Redux/Thunk/GeminiThunk";
 import { getUser } from "../Redux/Thunk/UserThunk";
-import { Mic, MicOff } from "lucide-react"; // 🧩 install lucide-react: npm i lucide-react
+import { Mic, MicOff } from "lucide-react";
 
 export default function Hero() {
   const dispatch = useDispatch();
@@ -17,75 +17,101 @@ export default function Hero() {
   const [transcriptText, setTranscriptText] = useState("");
   const [response, setResponse] = useState("");
 
-  const isSpeakingRef = useRef(false);
   const recognitionRef = useRef(null);
-  const synth = window.speechSynthesis;
+  const synthRef = useRef(window.speechSynthesis);
 
+  // fetch user once
   useEffect(() => {
     dispatch(getUser());
   }, [dispatch]);
 
-  // 🎤 Start recognition manually
+  // 🎤 Start recognition
   const startRecognition = () => {
-    if (!recognitionRef.current) return;
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+
+    if (listening) return; // prevent crash
+
     try {
-      recognitionRef.current.start();
+      recognition.start();
       console.log("🎧 Mic started");
     } catch (err) {
       console.warn("Mic start error:", err);
     }
   };
 
-  // 🔇 Stop recognition manually
+  // 🔇 Stop recognition
   const stopRecognition = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+    const recognition = recognitionRef.current;
+    if (recognition) {
+      recognition.stop();
       console.log("🛑 Mic stopped");
     }
   };
 
-  // 🗣️ Speak
+  // 🗣️ Speak function
   const speak = (text) => {
     if (!text) return;
+
     stopRecognition();
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "hi-IN";
-    const voices = synth.getVoices();
+
+    const voices = synthRef.current.getVoices();
     const hindiVoice = voices.find((v) => v.lang === "hi-IN");
     if (hindiVoice) utterance.voice = hindiVoice;
-    synth.cancel();
-    synth.speak(utterance);
-    utterance.onend = () => {
-      console.log("✅ Done speaking");
-    };
+
+    synthRef.current.cancel();
+    synthRef.current.speak(utterance);
   };
 
-  // 🎯 Handle Command
+  // 🎯 Command handler
   const handleCommand = (data) => {
     const { type, userInput, response } = data;
+
     speak(response);
+
     const actions = {
       "google-search": () =>
-        window.open(`https://www.google.com/search?q=${encodeURIComponent(userInput)}`, "_blank"),
+        window.open(
+          `https://www.google.com/search?q=${encodeURIComponent(userInput)}`,
+          "_blank"
+        ),
       "calculator-open": () =>
         window.open("https://www.google.com/search?q=calculator", "_blank"),
-      "instagram-open": () => window.open("https://www.instagram.com/", "_blank"),
-      "facebook-open": () => window.open("https://www.facebook.com/", "_blank"),
+      "instagram-open": () =>
+        window.open("https://www.instagram.com/", "_blank"),
+      "facebook-open": () =>
+        window.open("https://www.facebook.com/", "_blank"),
       "weather-show": () =>
         window.open("https://www.google.com/search?q=weather", "_blank"),
       "youtube-search": () =>
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(userInput)}`, "_blank"),
+        window.open(
+          `https://www.youtube.com/results?search_query=${encodeURIComponent(
+            userInput
+          )}`,
+          "_blank"
+        ),
       "youtube-play": () =>
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(userInput)}`, "_blank"),
+        window.open(
+          `https://www.youtube.com/results?search_query=${encodeURIComponent(
+            userInput
+          )}`,
+          "_blank"
+        ),
     };
+
     if (actions[type]) actions[type]();
   };
 
-  // 🧠 Setup speech recognition once
+  // 🧠 Setup speech recognition ONLY ONCE
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
     if (!SpeechRecognition) {
-      alert("Speech Recognition not supported in this browser.");
+      console.log("Speech recognition not supported");
       return;
     }
 
@@ -93,11 +119,6 @@ export default function Hero() {
     recognition.continuous = true;
     recognition.lang = "en-US";
     recognition.interimResults = false;
-    recognitionRef.current = recognition;
-
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(() => console.log("✅ Mic access granted"))
-      .catch(() => alert("⚠️ Please allow microphone access."));
 
     recognition.onstart = () => {
       console.log("🎧 Listening...");
@@ -105,30 +126,42 @@ export default function Hero() {
     };
 
     recognition.onend = () => {
-      console.log("🛑 Stopped listening");
+      console.log("🛑 Listening stopped");
       setListening(false);
     };
 
     recognition.onerror = (e) => {
-      console.warn("⚠️ Recognition error:", e.error);
+      console.warn("Recognition error:", e.error);
       setListening(false);
     };
 
     recognition.onresult = async (e) => {
-      const transcript = e.results[e.results.length - 1][0].transcript.trim();
+      const transcript =
+        e.results[e.results.length - 1][0].transcript.trim();
+
       console.log("🎧 Heard:", transcript);
       setTranscriptText(transcript);
 
       if (transcript.toLowerCase().includes(assistantName.toLowerCase())) {
         stopRecognition();
+
         try {
-          const data = await dispatch(getGeminiResponse(transcript)).unwrap();
+          const data = await dispatch(
+            getGeminiResponse(transcript)
+          ).unwrap();
+
           const aiResponse =
             data?.response ||
             data?.data?.response ||
             "Sorry, I didn’t understand that.";
+
           setResponse(aiResponse);
-          handleCommand({ ...data, response: aiResponse, userInput: transcript });
+
+          handleCommand({
+            ...data,
+            response: aiResponse,
+            userInput: transcript,
+          });
         } catch (error) {
           console.error("Gemini error:", error);
           setResponse("Error processing your request.");
@@ -136,18 +169,29 @@ export default function Hero() {
       }
     };
 
-    // 🎤 Initial greeting
+    recognitionRef.current = recognition;
+
+    // mic permission check
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(() => console.log("✅ Mic permission granted"))
+      .catch(() => console.log("⚠️ Mic permission denied"));
+
+    return () => recognition.stop();
+  }, []); // IMPORTANT empty dependency
+
+  // 👋 Greeting (separate so recognition not recreated)
+  useEffect(() => {
     const greeting = new SpeechSynthesisUtterance(
       `Hello ${username}, I am your ${assistantName}. Tap the mic button to start speaking.`
     );
     greeting.lang = "en-IN";
-    synth.speak(greeting);
-  }, [assistantName, username, dispatch]);
+    synthRef.current.speak(greeting);
+  }, [username, assistantName]);
 
-  // 🎨 UI
+  // UI
   return (
     <div className="w-full flex flex-col justify-center items-center gap-6 bg-gradient-to-b from-[#0f172a] to-[#1e293b] text-center px-4 relative min-h-screen overflow-hidden">
-      {/* AI Avatar */}
       <motion.img
         src={Ai}
         alt="AI"
@@ -172,7 +216,6 @@ export default function Hero() {
         </motion.div>
       )}
 
-      {/* MIC BUTTON */}
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={() => {
@@ -188,7 +231,6 @@ export default function Hero() {
         {listening ? <MicOff size={32} /> : <Mic size={32} />}
       </motion.button>
 
-      {/* Wave animation when listening */}
       {listening && (
         <motion.div
           className="flex gap-1 mt-4"
@@ -215,7 +257,7 @@ export default function Hero() {
                 },
               }}
               style={{ height: "20px" }}
-            ></motion.div>
+            />
           ))}
         </motion.div>
       )}

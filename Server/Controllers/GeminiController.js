@@ -10,28 +10,36 @@ export const askToAssistant = async (req, res) => {
             return res.status(400).json({ response: "Command is required." });
         }
 
-        const userId = req.userId
+        const userId = req.userId;
 
-        const user = await $user.findById(userId)
+        const user = await $user.findById(userId);
         if (!user) {
-            return res.status(400).json({ response: "user not found" });
+            return res.status(400).json({ response: "User not found" });
         }
 
-        const assistantName = user.assistantname
+        const assistantName = user.assistantname;
 
-        const result = await geminiResponse(command,assistantName);
+        const result = await geminiResponse(command, assistantName);
 
         if (!result) {
             return res.status(400).json({ response: "Empty response from Gemini." });
         }
 
-        // ✅ Fix regex to correctly extract JSON from text (supports newlines)
         const jsonMatch = result.match(/\{[\s\S]*\}/);
+
         if (!jsonMatch) {
             return res.status(400).json({ response: "Sorry, I couldn't understand that." });
         }
 
-        const gemResult = JSON.parse(jsonMatch[0]);
+        let gemResult;
+        try {
+            gemResult = JSON.parse(jsonMatch[0]);
+        } catch {
+            return res.status(400).json({
+                response: "Invalid response format from assistant."
+            });
+        }
+
         const type = gemResult.type;
 
         switch (type) {
@@ -63,24 +71,11 @@ export const askToAssistant = async (req, res) => {
                     response: `This month is ${moment().format("MMMM")}`,
                 });
 
-            // ✅ handle all other Gemini response types
-            case "google-search":
-            case "youtube-search":
-            case "youtube-play":
-            case "general":
-            case "calculator-open":
-            case "instagram-open":
-            case "facebook-open":
-            case "weather-show":
+            default:
                 return res.json({
                     type,
                     userInput: gemResult.userInput,
-                    response: gemResult.response,
-                });
-
-            default:
-                return res.status(400).json({
-                    response: "I didn't understand that command.",
+                    response: gemResult.response || "I didn't understand that command.",
                 });
         }
     } catch (error) {

@@ -1,66 +1,88 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const auth = import.meta.env.VITE_API_URL
+const auth = import.meta.env.VITE_API_URL;
 
-
-export const register = createAsyncThunk('register', async (data, { rejectWithValue }) => {
+export const register = createAsyncThunk(
+  "register",
+  async (data, { rejectWithValue }) => {
     try {
-        const res = await axios.post(`${auth}/register`, data, { withCredentials: true })
-
+      const res = await axios.post(`${auth}/register`, data, { withCredentials: true });
+      return res.data;
     } catch (error) {
-        console.log(error.response.data.message)
-        return rejectWithValue(error.response.data.message)
+      return rejectWithValue(
+        error?.response?.data?.message || "Register failed"
+      );
     }
-})
-export const login = createAsyncThunk('login', async (data, { rejectWithValue }) => {
+  }
+);
+
+export const login = createAsyncThunk(
+  "login",
+  async (data, { rejectWithValue }) => {
     try {
-        const res = await axios.post(`${auth}/login`, data, { withCredentials: true })
-
+      const res = await axios.post(`${auth}/login`, data, { withCredentials: true });
+      return res.data;
     } catch (error) {
-        console.log(error.response.data.message)
-        return rejectWithValue(error.response.data.message)
+      return rejectWithValue(
+        error?.response?.data?.message || "Login failed"
+      );
     }
-})
+  }
+);
 
-export const autoLogin = createAsyncThunk('autologin', async (_, { rejectWithValue }) => {
+export const autoLogin = createAsyncThunk(
+  "autologin",
+  async (_, { rejectWithValue }) => {
     try {
-        const res = await axios.get(`${auth}/login/me`, { withCredentials: true })
-        return res.data
+      const res = await axios.get(`${auth}/login/me`, { withCredentials: true });
+      return res.data;
     } catch (error) {
-        console.log(error.response.data.message)
-        // return rejectWithValue(error.response.data.message)
+      return rejectWithValue(
+        error?.response?.data?.message || "Auto login failed"
+      );
     }
-})
+  }
+);
 
-export const logout = createAsyncThunk('logout', async (_, { rejectWithValue }) => {
+export const logout = createAsyncThunk(
+  "logout",
+  async (_, { rejectWithValue }) => {
     try {
-        const res = await axios.post(`${auth}/logout`, {}, { withCredentials: true })
-        return res.data
+      const res = await axios.post(`${auth}/logout`, {}, { withCredentials: true });
+      return res.data;
     } catch (error) {
-        console.log(error.response.data.message)
-        return rejectWithValue(error.response.data.message)
+      return rejectWithValue(
+        error?.response?.data?.message || "Logout failed"
+      );
     }
-})
+  }
+);
 
-//add assistant name
-export const addAssistantName = createAsyncThunk('assistantName', async (assistantName, { rejectWithValue }) => {
+export const addAssistantName = createAsyncThunk(
+  "assistantName",
+  async (assistantName, { rejectWithValue }) => {
     try {
-        const res = await axios.post(`${auth}/assistant`, assistantName, { withCredentials: true })
-
+      const res = await axios.post(`${auth}/assistant`, assistantName, { withCredentials: true });
+      return res.data;
     } catch (error) {
-        console.log(error.response.data.message)
-        return rejectWithValue(error.response.data.message)
+      return rejectWithValue(
+        error?.response?.data?.message || "Assistant name error"
+      );
     }
-})
+  }
+);
 
-//current user
-export const getUser = createAsyncThunk('getUser', async (_, { rejectWithValue }) => {
+export const getUser = createAsyncThunk(
+  "getUser",
+  async (_, { rejectWithValue }) => {
     try {
-        const res = await axios.get(`${auth}/user`, { withCredentials: true })
-        return res.data
+      const res = await axios.get(`${auth}/user`, { withCredentials: true });
+      return res.data;
     } catch (error) {
-        console.log(error.response.data.message)
-        return rejectWithValue(error.response.data.message)
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to get user"
+      );
     }
-})
+  }
+);
