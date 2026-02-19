@@ -25,12 +25,10 @@ export default function Hero() {
     dispatch(getUser());
   }, [dispatch]);
 
-  // 🎤 Start recognition
+  // Start mic
   const startRecognition = () => {
     const recognition = recognitionRef.current;
-    if (!recognition) return;
-
-    if (listening) return; // prevent crash
+    if (!recognition || listening) return;
 
     try {
       recognition.start();
@@ -40,7 +38,7 @@ export default function Hero() {
     }
   };
 
-  // 🔇 Stop recognition
+  // Stop mic
   const stopRecognition = () => {
     const recognition = recognitionRef.current;
     if (recognition) {
@@ -49,24 +47,18 @@ export default function Hero() {
     }
   };
 
-  // 🗣️ Speak function
+  // Speak
   const speak = (text) => {
     if (!text) return;
 
-    stopRecognition();
-
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "hi-IN";
-
-    const voices = synthRef.current.getVoices();
-    const hindiVoice = voices.find((v) => v.lang === "hi-IN");
-    if (hindiVoice) utterance.voice = hindiVoice;
+    utterance.lang = "en-IN";
 
     synthRef.current.cancel();
     synthRef.current.speak(utterance);
   };
 
-  // 🎯 Command handler
+  // Handle command
   const handleCommand = (data) => {
     const { type, userInput, response } = data;
 
@@ -78,6 +70,8 @@ export default function Hero() {
           `https://www.google.com/search?q=${encodeURIComponent(userInput)}`,
           "_blank"
         ),
+      "youtube-open": () =>
+        window.open("https://www.youtube.com/", "_blank"),
       "calculator-open": () =>
         window.open("https://www.google.com/search?q=calculator", "_blank"),
       "instagram-open": () =>
@@ -103,15 +97,16 @@ export default function Hero() {
     };
 
     if (actions[type]) actions[type]();
+    else console.log("Unknown command type:", type);
   };
 
-  // 🧠 Setup speech recognition ONLY ONCE
+  // Setup speech recognition
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      console.log("Speech recognition not supported");
+      alert("Speech Recognition not supported in this browser.");
       return;
     }
 
@@ -142,12 +137,20 @@ export default function Hero() {
       console.log("🎧 Heard:", transcript);
       setTranscriptText(transcript);
 
-      if (transcript.toLowerCase().includes(assistantName.toLowerCase())) {
+      // remove assistant name if spoken
+      const cleanedTranscript = transcript
+        .toLowerCase()
+        .replace(assistantName.toLowerCase(), "")
+        .trim();
+
+      if (cleanedTranscript.length > 1) {
         stopRecognition();
 
         try {
+          console.log("Calling API with:", cleanedTranscript);
+
           const data = await dispatch(
-            getGeminiResponse(transcript)
+            getGeminiResponse(cleanedTranscript)
           ).unwrap();
 
           const aiResponse =
@@ -160,7 +163,7 @@ export default function Hero() {
           handleCommand({
             ...data,
             response: aiResponse,
-            userInput: transcript,
+            userInput: cleanedTranscript,
           });
         } catch (error) {
           console.error("Gemini error:", error);
@@ -171,16 +174,15 @@ export default function Hero() {
 
     recognitionRef.current = recognition;
 
-    // mic permission check
     navigator.mediaDevices
       .getUserMedia({ audio: true })
-      .then(() => console.log("✅ Mic permission granted"))
-      .catch(() => console.log("⚠️ Mic permission denied"));
+      .then(() => console.log("✅ Mic access granted"))
+      .catch(() => alert("⚠️ Please allow microphone access."));
 
     return () => recognition.stop();
-  }, []); // IMPORTANT empty dependency
+  }, []);
 
-  // 👋 Greeting (separate so recognition not recreated)
+  // Greeting
   useEffect(() => {
     const greeting = new SpeechSynthesisUtterance(
       `Hello ${username}, I am your ${assistantName}. Tap the mic button to start speaking.`
@@ -189,7 +191,6 @@ export default function Hero() {
     synthRef.current.speak(greeting);
   }, [username, assistantName]);
 
-  // UI
   return (
     <div className="w-full flex flex-col justify-center items-center gap-6 bg-gradient-to-b from-[#0f172a] to-[#1e293b] text-center px-4 relative min-h-screen overflow-hidden">
       <motion.img
@@ -222,51 +223,19 @@ export default function Hero() {
           if (listening) stopRecognition();
           else startRecognition();
         }}
-        className={`mt-8 flex items-center justify-center w-16 h-16 rounded-full border-4 transition-all duration-300 ${
-          listening
+        className={`mt-8 flex items-center justify-center w-16 h-16 rounded-full border-4 transition-all duration-300 ${listening
             ? "border-red-500 bg-red-500/30 text-red-400 shadow-[0_0_25px_#f87171]"
             : "border-blue-500 bg-blue-500/20 text-blue-400 shadow-[0_0_25px_#38bdf8]"
-        }`}
+          }`}
       >
         {listening ? <MicOff size={32} /> : <Mic size={32} />}
       </motion.button>
-
-      {listening && (
-        <motion.div
-          className="flex gap-1 mt-4"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            visible: { transition: { staggerChildren: 0.1 } },
-          }}
-        >
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="w-1.5 sm:w-2 bg-blue-400 rounded-full"
-              variants={{
-                hidden: { scaleY: 0.3 },
-                visible: {
-                  scaleY: [0.3, 1.2, 0.5],
-                  transition: {
-                    repeat: Infinity,
-                    duration: 0.8,
-                    delay: i * 0.1,
-                    ease: "easeInOut",
-                  },
-                },
-              }}
-              style={{ height: "20px" }}
-            />
-          ))}
-        </motion.div>
-      )}
 
       <p className="text-white text-sm sm:text-base max-w-[700px] opacity-80 mt-4">
         <span className="text-blue-300">
           {transcriptText
             ? `"${transcriptText}"`
-            : `Tap the mic & say "${assistantName}"`}
+            : `Tap the mic & speak`}
         </span>
       </p>
     </div>
