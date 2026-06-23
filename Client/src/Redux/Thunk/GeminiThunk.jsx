@@ -13,7 +13,7 @@ export const getGeminiResponse = createAsyncThunk(
         {
           withCredentials: true,
           timeout: 15000,
-        }
+        },
       );
 
       return result.data;
@@ -22,9 +22,9 @@ export const getGeminiResponse = createAsyncThunk(
 
       return rejectWithValue(
         error?.response?.data?.response ||
-        error?.response?.data?.message ||
-        "Server is not responding. Try again."
+          error?.response?.data?.message ||
+          "Server is not responding. Try again.",
       );
     }
-  }
+  },
 );

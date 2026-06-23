@@ -1,5 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addAssistantName, autoLogin, getUser, login, logout, register } from "../Thunk/UserThunk";
+import {
+  addAssistantName,
+  autoLogin,
+  getUser,
+  login,
+  logout,
+  register,
+} from "../Thunk/UserThunk";
 
 const UserSlice = createSlice({
   name: "user",
@@ -11,7 +18,7 @@ const UserSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -60,7 +67,7 @@ const UserSlice = createSlice({
       .addCase(getUser.fulfilled, (state, action) => {
         state.user = action.payload;
       });
-  }
+  },
 });
 
 export const { clearError } = UserSlice.actions;

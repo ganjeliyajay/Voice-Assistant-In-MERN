@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
     res.send("✅ Voice Assistant Backend is running!");
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4040;
 app.listen(PORT, () =>
     console.log(`🚀 Server is running on port: ${PORT}`)
 );
