@@ -139,13 +139,14 @@ export default function AddAssistantName() {
 
       {/* card */}
       <div
-        className="assistant-card relative z-10 w-[90%] max-w-[420px]
-                flex flex-col items-center gap-6 px-10 py-12
+        className="assistant-card relative z-10 w-[92%] sm:w-[90%] max-w-[420px]
+flex flex-col items-center gap-5 sm:gap-6
+px-5 sm:px-10 py-8 sm:py-12
                 bg-white/10 backdrop-blur-xl
                 border border-cyan-400/40
                 rounded-[30px]"
       >
-        <h1 className="text-3xl font-bold text-white text-center tracking-wide">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white text-center tracking-wide">
           Name Your <span className="text-cyan-400">Assistant</span>
         </h1>
 
@@ -156,7 +157,7 @@ export default function AddAssistantName() {
             placeholder="Enter assistant name..."
             value={assistantName}
             onChange={inputHandle}
-            className="w-full h-[55px] px-5 rounded-xl
+            className="w-full h-[50px] sm:h-[55px] px-5 rounded-xl
                         bg-black/40 border border-white/20
                         text-white placeholder-gray-400
                         focus:border-cyan-400 focus:shadow-[0_0_15px_cyan]

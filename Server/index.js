@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { DatabaseConncet } from "./Configs/db.js";
 import { routes } from "./Routes/AuthRoutes.js";
+import historyRoutes from "./Routes/historyRoutes.js";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(
 DatabaseConncet();
 
 app.use("/assistant", routes);
+app.use("/assistant/history", historyRoutes);
 
 app.get("/", (req, res) => {
     res.send("✅ Voice Assistant Backend is running!");

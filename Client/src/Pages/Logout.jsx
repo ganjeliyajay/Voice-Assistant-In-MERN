@@ -38,22 +38,24 @@ export default function Logout() {
     <div className="flex items-center justify-center w-full">
       {loading ? (
         <div className="flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-white/20 border-t-red-400 rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-white/20  rounded-full animate-spin"></div>
         </div>
       ) : (
         <button
           onClick={handleLogout}
-          className="flex items-center justify-center sm:justify-start gap-2 w-full
-                        px-3 sm:px-4 py-2 sm:py-3 rounded-xl
-                        bg-white/10 backdrop-blur-md border border-red-400/30
-                        text-white hover:bg-red-500/20
-                        transition-all duration-300
-                        shadow-[0_0_12px_rgba(248,113,113,0.35)]"
+          className="
+w-10 h-10
+rounded-full
+flex items-center justify-center
+bg-red-500/15
+border border-red-400/30
+backdrop-blur-xl
+hover:bg-red-500/25
+transition-all duration-300
+shadow-[0_0_15px_rgba(248,113,113,0.4)]
+"
         >
           <TbLogout className="text-xl text-red-400" />
-
-          {/* Title only mobile */}
-          <span className="text-sm font-medium sm:hidden">Logout</span>
         </button>
       )}
     </div>

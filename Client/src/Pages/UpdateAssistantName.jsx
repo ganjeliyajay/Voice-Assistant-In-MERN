@@ -16,17 +16,19 @@ export default function UpdateAssistantName() {
       ) : (
         <button
           onClick={() => navigate("/assistant")}
-          className="flex items-center justify-center sm:justify-start gap-2 w-full
-                        px-3 sm:px-4 py-2 sm:py-3 rounded-xl
-                        bg-white/10 backdrop-blur-md border border-cyan-400/30
-                        text-white hover:bg-cyan-500/20
-                        transition-all duration-300
-                        shadow-[0_0_12px_rgba(34,211,238,0.35)]"
+          className="
+w-10 h-10
+rounded-full
+flex items-center justify-center
+bg-cyan-500/15
+border border-cyan-400/30
+backdrop-blur-xl
+hover:bg-cyan-500/25
+transition-all duration-300
+shadow-[0_0_15px_rgba(34,211,238,0.4)]
+"
         >
           <FaEdit className="text-blue-400 text-xl" />
-
-          {/* Title only mobile */}
-          <span className="text-sm font-medium sm:hidden">Update Name</span>
         </button>
       )}
     </div>

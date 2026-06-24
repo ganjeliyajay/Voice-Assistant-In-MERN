@@ -1,18 +1,15 @@
 import React, { useEffect, useRef } from "react";
 
 export default function VoiceWave({ speaking }) {
-
   const canvasRef = useRef(null);
   const analyserRef = useRef(null);
   const dataArrayRef = useRef(null);
   const animationRef = useRef(null);
 
   useEffect(() => {
-
     if (!speaking) return;
 
     const initAudio = async () => {
-
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const audioContext = new AudioContext();
@@ -31,17 +28,14 @@ export default function VoiceWave({ speaking }) {
       dataArrayRef.current = dataArray;
 
       draw();
-
     };
 
     initAudio();
 
     return () => cancelAnimationFrame(animationRef.current);
-
   }, [speaking]);
 
   const draw = () => {
-
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
@@ -60,7 +54,6 @@ export default function VoiceWave({ speaking }) {
     gradient.addColorStop(1, "#ec4899");
 
     const render = () => {
-
       animationRef.current = requestAnimationFrame(render);
 
       analyser.getByteFrequencyData(dataArray);
@@ -70,7 +63,6 @@ export default function VoiceWave({ speaking }) {
       const barWidth = WIDTH / bars;
 
       for (let i = 0; i < bars; i++) {
-
         const value = dataArray[i % dataArray.length];
 
         const normalized = value / 255;
@@ -91,13 +83,10 @@ export default function VoiceWave({ speaking }) {
         ctx.beginPath();
         ctx.roundRect(x, y, barWidth - 4, barHeight, 6);
         ctx.fill();
-
       }
-
     };
 
     render();
-
   };
 
   if (!speaking) return null;
@@ -105,9 +94,9 @@ export default function VoiceWave({ speaking }) {
   return (
     <canvas
       ref={canvasRef}
-      width={400}
-      height={90}
-      className="mt-4"
+      width={350}
+      height={80}
+      className="mt-4 w-[280px] sm:w-[350px] md:w-[400px] h-auto"
     />
   );
 }

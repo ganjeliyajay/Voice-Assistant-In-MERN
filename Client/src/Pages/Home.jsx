@@ -4,12 +4,14 @@ import Hero from "../Components/Hero";
 import { useDispatch, useSelector } from "react-redux";
 import UpdateAssistantName from "./UpdateAssistantName";
 import AiBackground from "../Components/AiBackground";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { autoLogin } from "../Redux/Thunk/UserThunk";
+import HistoryPage from "../Components/HistoryPage";
 
 export default function Home() {
   const { user } = useSelector((s) => s.users);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -26,70 +28,24 @@ export default function Home() {
   const username = user?.data?.userName;
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   return (
     <div className="relative w-full min-h-screen bg-black overflow-hidden">
-      {/* Background */}
+      {" "}
       <AiBackground />
-
       <div className="absolute inset-0 backdrop-blur-[3px] bg-black/20">
         {/* Username */}
-        <div className="absolute top-4 left-4 sm:top-6 sm:left-8 z-40">
-          <h1 className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide">
+        <div className="absolute top-4 left-4 sm:top-6 sm:left-8 z-40 max-w-[70%]">
+          <h1 className="text-white text-base sm:text-xl md:text-2xl truncate font-semibold tracking-wide">
             Hello, <span className="text-blue-400 font-bold">{username}</span>
           </h1>
         </div>
 
-        {/* Mobile Menu Button */}
-        <div className="absolute top-4 right-4 sm:hidden z-50">
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="p-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 shadow-lg hover:bg-blue-500/20 transition"
-          >
-            {!menuOpen && <Menu className="text-blue-300" size={24} />}
-          </button>
-        </div>
-
-        {/* Sidebar */}
-        <div
-          className={`fixed top-0 right-0 h-full w-[260px] bg-black/80 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 transform transition-transform duration-300 
-                ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
-        >
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <h2 className="text-white text-lg font-semibold">Menu</h2>
-
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="text-white hover:text-red-400 transition"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* User Info */}
-          <div className="px-4 py-3 border-b border-white/10">
-            <p className="text-gray-400 text-xs">Logged in as</p>
-
-            <p className="text-blue-400 font-semibold">{username}</p>
-          </div>
-
-          {/* Sidebar Options */}
-          <div className="flex flex-col gap-3 p-4">
-            <div className="p-3 rounded-lg hover:bg-blue-500/20 transition cursor-pointer">
-              <UpdateAssistantName />
-            </div>
-
-            <div className="p-3 rounded-lg hover:bg-red-500/20 transition cursor-pointer">
-              <Logout />
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Left Buttons */}
-        <div className="hidden sm:flex absolute left-6 bottom-[6%] flex-col gap-4 z-50">
+        {/* Desktop Buttons */}
+        <div className="hidden lg:flex absolute left-6 bottom-[6%] flex-col gap-4 z-50">
           <div className="group flex items-center">
-            <div className=" p-3 rounded-xl cursor-pointer transition shadow-lg">
+            <div className="p-3 rounded-xl cursor-pointer transition shadow-lg">
               <UpdateAssistantName />
             </div>
 
@@ -109,11 +65,94 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hero Section */}
+        {/* Hero */}
         <div className="flex items-center justify-center h-full relative z-10 px-4 sm:px-6">
-          <Hero />
+          <Hero openHistory={() => setShowHistory(true)} />
+        </div>
+
+        {/* Mobile Radial Menu */}
+        <div className="fixed bottom-5 left-5 sm:hidden z-[999]">
+          {/* Update */}
+          <div
+            className={`absolute transition-all duration-300 ${
+              menuOpen
+                ? "-translate-y-16 opacity-100"
+                : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <div
+              className="
+      w-11 h-11
+      rounded-full
+      bg-cyan-500/20
+      backdrop-blur-xl
+      border border-cyan-400/30
+      shadow-[0_0_15px_rgba(34,211,238,0.4)]
+      flex items-center justify-center
+    "
+            >
+              <UpdateAssistantName />
+            </div>
+          </div>
+
+          {/* Logout */}
+          <div
+            className={`absolute transition-all duration-300 ${
+              menuOpen
+                ? "-translate-y-30 opacity-100"
+                : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <div
+              className="
+      w-11 h-11
+      rounded-full
+      bg-red-500/20
+      backdrop-blur-xl
+      shadow-[0_0_15px_rgba(248,113,113,0.4)]
+      flex items-center justify-center
+    "
+            >
+              <Logout />
+            </div>
+          </div>
+
+          {/* Glow */}
+          <div
+            className="
+          absolute
+          -inset-3
+          rounded-full
+          bg-cyan-500/20
+          blur-xl
+          animate-pulse
+        "
+          />
+
+          {/* Main Menu Button */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="
+    relative
+    w-12 h-12
+    rounded-full
+    bg-transparent backdrop-blur-xl
+    border border-white/20
+    flex items-center justify-center
+    shadow-[0_0_20px_rgba(34,211,238,0.5)]
+    transition-all duration-300
+    active:scale-95
+  "
+          >
+            {menuOpen ? (
+              <X size={18} className="text-white" />
+            ) : (
+              <Menu size={18} className="text-white" />
+            )}
+          </button>
         </div>
       </div>
+      {showHistory && <HistoryPage setShowHistory={setShowHistory} />}
     </div>
   );
 }

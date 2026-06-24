@@ -4,12 +4,14 @@ import Ai from "../assets/Ai-image/image.png";
 import { useDispatch, useSelector } from "react-redux";
 import { getGeminiResponse } from "../Redux/Thunk/GeminiThunk";
 import { autoLogin, getUser } from "../Redux/Thunk/UserThunk";
-import { Mic } from "lucide-react";
+import { History, Mic } from "lucide-react";
 import VoiceWave from "./VoiceWave";
 import TypingText from "./TypingText";
 import { useNavigate } from "react-router-dom";
+import HistoryPage from "./HistoryPage";
+import { saveHistory } from "../Redux/Thunk/HistoryThunk";
 
-export default function Hero() {
+export default function Hero({ openHistory }) {
   const dispatch = useDispatch();
   const { user } = useSelector((s) => s.users);
   const navigate = useNavigate();
@@ -267,6 +269,12 @@ export default function Hero() {
             data?.data?.response ||
             "Sorry, I didn't understand";
 
+          await dispatch(
+            saveHistory({
+              userMessage: cleanedTranscript,
+              assistantResponse: aiResponse,
+            }),
+          );
           setResponse(aiResponse);
 
           handleCommand({
@@ -321,15 +329,45 @@ export default function Hero() {
   }, [assistantName]);
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+    <div className="relative w-full min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-8 overflow-hidden">
       <div className="flex flex-col items-center justify-center gap-5">
+        {/* HISTORY BUTTON */}
+        <button
+          onClick={() => openHistory()}
+          className="
+    absolute
+    top-4
+    right-4
+    sm:top-5
+    sm:right-5
+    px-4
+    py-2
+    text-xs
+    sm:text-sm
+    font-semibold
+    tracking-wide
+    text-blue-300
+    bg-white/5
+    backdrop-blur-xl
+    border border-blue-400/20
+    rounded-xl
+    shadow-[0_0_20px_rgba(59,130,246,0.15)]
+    hover:border-blue-400/50
+    hover:text-white
+    hover:bg-blue-500/10
+    transition-all
+  "
+        >
+          <History size={18} />
+        </button>
+
         <div className="relative flex items-center justify-center group">
           <div className="absolute w-[180px] h-[180px] bg-blue-500/20 blur-3xl rounded-full"></div>
 
           <img
             src={Ai}
             alt="AI"
-            className={`relative w-[150px] h-[150px] rounded-full object-cover border-2 border-blue-400 cursor-pointer transition-all duration-500 ${
+            className={`relative w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[180px] md:h-[180px] rounded-full object-cover border-2 border-blue-400 cursor-pointer transition-all duration-500 ${
               speaking
                 ? "shadow-[0_0_45px_#38bdf8] scale-105"
                 : "shadow-[0_0_15px_rgba(56,189,248,0.4)] animate-pulse"
@@ -348,7 +386,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <h1 className="mt-6 text-4xl font-bold text-white tracking-wide">
+      <h1 className="mt-6 text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-wide">
         AI{" "}
         <span className="text-blue-400">
           {assistantName?.charAt(0).toUpperCase() + assistantName?.slice(1)}
@@ -359,7 +397,7 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-8 bg-white/10 backdrop-blur-xl p-6 rounded-2xl max-w-[600px] border border-white/10 shadow-2xl text-blue-100"
+          className="mt-8 bg-white/10 backdrop-blur-xl p-4 sm:p-6 rounded-2xl w-full max-w-[95%] sm:max-w-[600px] border border-white/10 shadow-2xl text-blue-100"
         >
           <TypingText text={response} />
         </motion.div>
@@ -371,8 +409,7 @@ export default function Hero() {
           if (listening) stopRecognition();
           else startRecognition();
         }}
-        className={`relative mt-10 flex items-center justify-center 
-  w-16 h-16 rounded-full border border-blue-400/40 
+        className={`relative mt-8 sm:mt-10 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-blue-400/40 
   transition-all duration-300
   ${listening ? "bg-blue-500/20" : "bg-blue-500/10"}`}
       >
@@ -395,7 +432,7 @@ export default function Hero() {
         )}
       </motion.button>
 
-      <p className="mt-6 text-gray-300 max-w-[600px]">
+      <p className="mt-6 text-gray-300 text-sm sm:text-base max-w-[95%] sm:max-w-[600px] break-words">
         {transcriptText ? (
           <TypingText text={transcriptText} />
         ) : (
